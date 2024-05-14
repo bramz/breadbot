@@ -13,7 +13,7 @@ BreadBot is a Python-based cryptocurrency trading bot designed to automate tradi
 - **Historical Data Retrieval:** BreadBot retrieves historical data from supported APIs, enabling users to backtest strategies and optimize trading algorithms.
 - **Risk Management:** The bot supports stop-loss and profit-taking strategies, allowing users to manage risks and maximize gains.
 - **Customization:** Users can customize wallet addresses, API keys, and endpoints for each supported exchange, providing flexibility and control over trading operations.
-- **Easy Configuration:** BreadBot's configuration is user-friendly, with settings conveniently managed through the `config.py` file.
+- **Easy Configuration:** BreadBot's configuration is user-friendly, with settings conveniently managed through the `settings.py` file.
 
 ## Setup
 
@@ -31,7 +31,7 @@ To set up BreadBot, follow these steps:
 
 3. **Configuration:**
 
-- Open config.py in a text editor.
+- Open settings.py in a text editor.
 - Update INFURA_URL with your Infura Project URL for Ethereum interactions.
 - Define wallet addresses and private keys under the WALLETS section.
 - Configure API endpoints, keys, and secrets for each supported exchange in the EXCHANGES section.
