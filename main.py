@@ -1,9 +1,34 @@
+"""
+BreadBot Launcher
+
+This script serves as the entry point for launching BreadBot, a cryptocurrency trading bot.
+It initializes the bot with required parameters and starts the trading process.
+
+Usage:
+1. Configure settings in config/settings.py, including INFURA_URL, WALLETS, and EXCHANGES.
+2. Ensure that all necessary dependencies are installed.
+3. Run this script to start BreadBot and begin trading.
+
+Example:
+    python main.py
+
+"""
+
 import requests
 from bot import BreadBot
 from config.settings import INFURA_URL, WALLETS, EXCHANGES
 from util import market_analysis, risk_management, exchange_api
 
 def get_historical_data(api_endpoint):
+    """
+    Fetch historical data from a specified API endpoint.
+
+    Args:
+        api_endpoint (str): The URL of the API endpoint.
+
+    Returns:
+        dict or None: Historical data as a dictionary if successful, None otherwise.
+    """
     try:
         response = requests.get(api_endpoint)
         if response.status_code == 200:
@@ -16,6 +41,15 @@ def get_historical_data(api_endpoint):
         return None
 
 def main():
+    """
+    Main function to initialize BreadBot and start trading.
+
+    Steps:
+    1. Initialize BreadBot with settings from config/settings.py.
+    2. Start trading using BreadBot.
+    3. Retrieve historical data from supported APIs and perform backtesting.
+
+    """
     breadbot = BreadBot(INFURA_URL, WALLETS, EXCHANGES, market_analysis.TrendingStrategy, risk_management.RSIAnalysis(), exchange_api.APIClient)
     breadbot.start_trading()
 
