@@ -1,5 +1,7 @@
 # BreadBot
 
+<img src="breadbot.png" alt="BreadBot Logo" width="100" height="100">
+
 "Empowering your crypto journey, one trade at a time."
 
 ## Introduction
