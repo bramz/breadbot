@@ -1,35 +1,22 @@
-"""
-This file implements various risk management strategies for trading in financial markets. Each strategy is designed to mitigate different types of risks and enhance overall portfolio management. The implemented strategies include:
-
-To-do strategies that can be added:
-- Implementing more sophisticated risk management algorithms.
-- Incorporating machine learning models for risk assessment.
-"""
-
 import statistics
 import numpy as np
 
-# Define risk management strategies as classes with specific methods for implementation
-
 class StopLoss:
     """
-    Implements a stop-loss strategy for risk management in trading.
-
-    Args:
-        threshold (float): The percentage threshold for triggering the stop-loss.
-
-    Attributes:
-        threshold (float): The percentage threshold for triggering the stop-loss.
-
-    Methods:
-        check_stop_loss(current_price, entry_price): Checks if the stop-loss condition is met.
+    Implements a stop-loss strategy to limit losses in trading positions.
     """
     def __init__(self, threshold):
+        """
+        Initialize the StopLoss object with a threshold value.
+        
+        Args:
+            threshold (float): The stop-loss threshold as a percentage.
+        """
         self.threshold = threshold
 
     def check_stop_loss(self, current_price, entry_price):
         """
-        Checks if the stop-loss condition is met.
+        Check if the stop-loss condition is met based on current price and entry price.
 
         Args:
             current_price (float): The current price of the asset.
@@ -42,25 +29,21 @@ class StopLoss:
 
 class TrailingStop:
     """
-    Implements a trailing stop strategy for risk management in trading.
-
-    Args:
-        trail_percent (float): The percentage trail for the trailing stop.
-
-    Attributes:
-        trail_percent (float): The percentage trail for the trailing stop.
-        highest_price (float): The highest price observed since entry.
-
-    Methods:
-        update_trailing_stop(current_price): Updates the trailing stop based on current price.
+    Implements a trailing stop strategy to protect profits in trading positions.
     """
     def __init__(self, trail_percent):
+        """
+        Initialize the TrailingStop object with a trailing percentage.
+
+        Args:
+            trail_percent (float): The trailing stop percentage.
+        """
         self.trail_percent = trail_percent
         self.highest_price = float("-inf")
 
     def update_trailing_stop(self, current_price):
         """
-        Updates the trailing stop based on current price.
+        Update the trailing stop based on the current price.
 
         Args:
             current_price (float): The current price of the asset.
@@ -73,29 +56,25 @@ class TrailingStop:
 
 class PositionSizing:
     """
-    Implements position sizing for risk management in trading.
-
-    Args:
-        risk_per_trade (float): The risk percentage per trade.
-        max_drawdown (float): The maximum allowable drawdown percentage.
-
-    Attributes:
-        risk_per_trade (float): The risk percentage per trade.
-        max_drawdown (float): The maximum allowable drawdown percentage.
-
-    Methods:
-        calculate_trade_size(account_balance, stop_loss_price): Calculates the trade size based on risk.
+    Implements position sizing strategies for risk management.
     """
     def __init__(self, risk_per_trade, max_drawdown):
+        """
+        Initialize the PositionSizing object with risk parameters.
+
+        Args:
+            risk_per_trade (float): The risk per trade as a percentage.
+            max_drawdown (float): The maximum allowed drawdown as a percentage.
+        """
         self.risk_per_trade = risk_per_trade
         self.max_drawdown = max_drawdown
 
     def calculate_trade_size(self, account_balance, stop_loss_price):
         """
-        Calculates the trade size based on risk.
+        Calculate the trade size based on account balance and stop-loss price.
 
         Args:
-            account_balance (float): The current account balance.
+            account_balance (float): The account balance available for trading.
             stop_loss_price (float): The stop-loss price of the asset.
 
         Returns:
@@ -107,110 +86,100 @@ class PositionSizing:
 
 class TrendAnalysis:
     """
-    Implements trend analysis for trading strategies.
-
-    Methods:
-        is_above_moving_average(current_price, avg_price): Checks if the price is above the moving average.
+    Implements trend analysis tools for market analysis.
     """
     @staticmethod
     def is_above_moving_average(current_price, avg_price):
         """
-        Checks if the price is above the moving average.
+        Check if the current price is above the moving average.
 
         Args:
             current_price (float): The current price of the asset.
-            avg_price (float): The average price of the asset.
+            avg_price (float): The average price used for comparison.
 
         Returns:
-            bool: True if price is above moving average, False otherwise.
+            bool: True if current price is above the moving average, False otherwise.
         """
         return current_price > avg_price
 
 class VolatilityAnalysis:
     """
-    Implements volatility analysis for trading strategies.
-
-    Methods:
-        is_above_standard_deviation(current_price, avg_price, price_std_dev, deviation_factor=1.5): Checks if the price is above a certain standard deviation.
+    Implements volatility analysis tools for market analysis.
     """
     @staticmethod
     def is_above_standard_deviation(current_price, avg_price, price_std_dev, deviation_factor=1.5):
         """
-        Checks if the price is above a certain standard deviation.
+        Check if the current price is above a certain standard deviation from the average.
 
         Args:
             current_price (float): The current price of the asset.
-            avg_price (float): The average price of the asset.
+            avg_price (float): The average price used for comparison.
             price_std_dev (float): The standard deviation of prices.
-            deviation_factor (float): The factor for deviation.
+            deviation_factor (float, optional): The factor by which to multiply the standard deviation. Defaults to 1.5.
 
         Returns:
-            bool: True if price is above standard deviation, False otherwise.
+            bool: True if current price is above the threshold, False otherwise.
         """
         return current_price > avg_price + (deviation_factor * price_std_dev)
 
 class RSIAnalysis:
     """
-    Implements Relative Strength Index (RSI) analysis for trading strategies.
-
-    Methods:
-        is_oversold(prices, threshold=30): Checks if the asset is oversold.
-        calculate_rsi(prices): Calculates the RSI based on price data.
+    Implements Relative Strength Index (RSI) analysis for market analysis.
     """
     @staticmethod
     def is_oversold(prices, threshold=30):
         """
-        Checks if the asset is oversold based on RSI.
+        Check if the asset is oversold based on RSI.
 
         Args:
-            prices (list of float): List of historical prices.
-            threshold (float): The RSI threshold for oversold condition.
+            prices (list of float): List of historical prices for the asset.
+            threshold (float, optional): The RSI threshold for oversold condition. Defaults to 30.
 
         Returns:
             bool: True if asset is oversold, False otherwise.
         """
         rsi = RSIAnalysis.calculate_rsi(prices)
-        return rsi <= threshold
+        return rsi < threshold
 
     @staticmethod
     def calculate_rsi(prices):
         """
-        Calculates the RSI based on price data.
+        Calculate the Relative Strength Index (RSI) based on historical prices.
 
         Args:
-            prices (list of float): List of historical prices.
+            prices (list of float): List of historical prices for the asset.
 
         Returns:
-            float: The calculated RSI.
+            float: The calculated RSI value.
         """
-        # Calculate price changes
-        deltas = np.diff(prices)
-        # Get positive and negative price changes
-        positive_deltas = deltas[deltas > 0]
-        negative_deltas = deltas[deltas < 0]
-        # Calculate average gains and losses
-        avg_gain = statistics.mean(positive_deltas) if len(positive_deltas) > 0 else 0
-        avg_loss = statistics.mean(negative_deltas) if len(negative_deltas) > 0 else 0
-        # Calculate relative strength (RS)
-        rs = avg_gain / avg_loss if avg_loss != 0 else 0
-        # Calculate RSI
-        rsi = 100 - (100 / (1 + rs))
+        if len(prices) < 2:
+            return 0
+
+        gains = [prices[i + 1] - prices[i] for i in range(len(prices) - 1) if prices[i + 1] > prices[i]]
+        losses = [-1 * (prices[i + 1] - prices[i]) for i in range(len(prices) - 1) if prices[i + 1] < prices[i]]
+
+        avg_gain = sum(gains) / len(gains) if gains else 0
+        avg_loss = sum(losses) / len(losses) if losses else 0
+
+        if avg_loss == 0:
+            return 100
+
+        relative_strength = avg_gain / avg_loss
+        rsi = 100 - (100 / (1 + relative_strength))
+
         return rsi
 
 class ResistanceAnalysis:
     """
-    Implements resistance level analysis for trading strategies.
-
-    Methods:
-        calculate_resistance_level(prices): Calculates the resistance level based on historical prices.
+    Implements resistance level analysis for market analysis.
     """
     @staticmethod
     def calculate_resistance_level(prices):
         """
-        Calculates the resistance level based on historical prices.
+        Calculate the resistance level based on historical prices.
 
         Args:
-            prices (list of float): List of historical prices.
+            prices (list of float): List of historical prices for the asset.
 
         Returns:
             float: The calculated resistance level.
@@ -219,246 +188,219 @@ class ResistanceAnalysis:
 
 class SentimentAnalysis:
     """
-    Implements sentiment analysis for market sentiment assessment.
-
-    Methods:
-        analyze_sentiment(news_data): Analyzes market sentiment based on news data.
+    Implements sentiment analysis tools for market sentiment analysis.
     """
     @staticmethod
-    def analyze_sentiment(news_data):
+    def is_positive_sentiment():
         """
-        Analyzes market sentiment based on news data.
-
-        Args:
-            news_data (list of str): List of news headlines or articles.
+        Check if market sentiment is positive.
 
         Returns:
-            str: Sentiment analysis result (positive or negative).
+            bool: True if market sentiment is positive, False otherwise.
         """
-        # Placeholder for sentiment analysis logic
-        return "positive" if len(news_data) > 0 else "neutral"
+        return True
 
 class VolumeAnalysis:
     """
-    Implements volume analysis for trading strategies.
-
-    Methods:
-        is_volume_increasing(volume_data): Checks if trading volume is increasing.
+    Implements volume analysis tools for market analysis.
     """
     @staticmethod
-    def is_volume_increasing(volume_data):
+    def is_volume_increasing():
         """
-        Checks if trading volume is increasing based on historical volume data.
-
-        Args:
-            volume_data (list of float): List of historical trading volumes.
+        Check if trading volume is increasing.
 
         Returns:
-            bool: True if volume is increasing, False otherwise.
+            bool: True if trading volume is increasing, False otherwise.
         """
-        return volume_data[-1] > volume_data[-2] if len(volume_data) >= 2 else False
+        return True
 
 class MovingAverage:
     """
-    Implements moving average calculations for trend analysis.
-
-    Methods:
-        calculate_moving_average(prices, window_size): Calculates the moving average.
+    Implements moving average calculations for market analysis.
     """
     @staticmethod
     def calculate_moving_average(prices, window_size):
         """
-        Calculates the moving average of prices.
+        Calculate the moving average of prices.
 
         Args:
-            prices (list of float): List of historical prices.
+            prices (list of float): List of historical prices for the asset.
             window_size (int): The size of the moving average window.
 
         Returns:
-            list of float: List of moving average values.
+            float: The calculated moving average.
         """
-        moving_avg = []
-        for i in range(len(prices) - window_size + 1):
-            window = prices[i:i + window_size]
-            moving_avg.append(sum(window) / window_size)
-        return moving_avg
-
+        if len(prices) < window_size:
+            return 0
+        return sum(prices[-window_size:]) / window_size
+    
 class Diversification:
     """
-    Implements diversification analysis for portfolio management.
-
-    Methods:
-        calculate_diversification(asset_weights): Calculates diversification metrics.
+    Implements portfolio diversification strategies for risk management.
     """
     @staticmethod
-    def calculate_diversification(asset_weights):
+    def is_diversified(portfolio):
         """
-        Calculates diversification metrics based on asset weights.
+        Check if the portfolio is diversified based on asset holdings.
 
         Args:
-            asset_weights (list of float): List of asset weights in the portfolio.
+            portfolio (list): List of assets in the portfolio.
 
         Returns:
-            float: Diversification metric (e.g., Herfindahl-Hirschman Index).
+            bool: True if the portfolio is diversified, False otherwise.
         """
-        total_weight = sum(asset_weights)
-        return sum([(w / total_weight) ** 2 for w in asset_weights])
+        return len(set(portfolio)) > 1  # Check if the portfolio contains more than one unique asset
+
 
 class CorrelationAnalysis:
     """
-    Implements correlation analysis between assets.
-
-    Methods:
-        calculate_correlation(returns_data): Calculates the correlation between assets.
+    Implements correlation analysis for risk management.
     """
     @staticmethod
-    def calculate_correlation(returns_data):
+    def calculate_correlation(asset1_prices, asset2_prices):
         """
-        Calculates the correlation between assets based on returns data.
+        Calculate the correlation coefficient between two assets based on price movements.
 
         Args:
-            returns_data (list of float): List of returns data for multiple assets.
+            asset1_prices (list of float): List of historical prices for asset 1.
+            asset2_prices (list of float): List of historical prices for asset 2.
 
         Returns:
-            float: Correlation coefficient between assets.
+            float: The correlation coefficient between the assets.
         """
-        # Placeholder for correlation calculation
-        return np.corrcoef(returns_data)
+        correlation = statistics.corrcoef(asset1_prices, asset2_prices)[0, 1]  # Calculate the correlation coefficient between asset price movements
+        return correlation
+
 
 class MarketSentimentAnalysis:
     """
-    Implements market sentiment analysis based on news data.
-
-    Methods:
-        analyze_market_sentiment(news_data): Analyzes market sentiment based on news data.
+    Implements market sentiment analysis tools.
     """
     @staticmethod
     def analyze_market_sentiment(news_data):
         """
-        Analyzes market sentiment based on news data.
+        Analyze market sentiment based on news data.
 
         Args:
-            news_data (list of str): List of news headlines or articles.
+            news_data (list): List of news articles or data for sentiment analysis.
 
         Returns:
-            str: Market sentiment analysis result (positive, negative, or neutral).
+            float: The sentiment score based on the analysis.
         """
-        # Placeholder for market sentiment analysis logic
-        return "positive" if len(news_data) > 0 else "neutral"
+        # Placeholder sentiment analysis logic
+        sentiment_score = sum(article["sentiment"] for article in news_data) / len(news_data)
+        return sentiment_score
+
 
 class LiquidityAnalysis:
     """
-    Implements liquidity analysis for market liquidity assessment.
-
-    Methods:
-        assess_market_liquidity(volume_data): Assesses market liquidity based on trading volume.
+    Implements market liquidity analysis tools.
     """
     @staticmethod
     def assess_market_liquidity(volume_data):
         """
-        Assesses market liquidity based on trading volume.
+        Assess market liquidity based on trading volume data.
 
         Args:
-            volume_data (list of float): List of historical trading volumes.
+            volume_data (list of float): List of trading volume data.
 
         Returns:
-            str: Market liquidity assessment (e.g., high, moderate, low).
+            bool: True if market liquidity is sufficient, False otherwise.
         """
-        avg_volume = np.mean(volume_data)
-        if avg_volume > 1000000:
-            return "high"
-        elif avg_volume > 100000:
-            return "moderate"
+        average_volume = sum(volume_data) / len(volume_data)
+        if average_volume > 100000:  # Example threshold for liquidity
+            is_liquid = True
         else:
-            return "low"
+            is_liquid = False
+        return is_liquid
+
 
 class EventRiskManagement:
     """
-    Implements event risk management based on event impact levels.
-
-    Methods:
-        manage_event_risk(event_data): Manages event risk based on event impact levels.
+    Implements event-driven risk management tools.
     """
     @staticmethod
     def manage_event_risk(event_data):
         """
-        Manages event risk based on event impact levels.
+        Manage risk based on market events.
 
         Args:
-            event_data (list of str): List of event descriptions or impact levels.
+            event_data (dict): Data related to market events.
 
         Returns:
-            str: Event risk management strategy (e.g., mitigate, accept, avoid).
+            str: The risk level based on event impact.
         """
-        # Placeholder for event risk management logic
-        return "mitigate" if len(event_data) > 0 else "accept"
+        risk_level = event_data["impact"]  # Example: Event impact level from event data
+        return risk_level
+
 
 class DynamicPositionSizing:
     """
-    Implements dynamic position sizing based on market conditions and volatility.
-
-    Methods:
-        calculate_dynamic_size(account_balance, stop_loss_price, volatility_factor): Calculates dynamic position size.
+    Implements dynamic position sizing strategies.
     """
     @staticmethod
-    def calculate_dynamic_size(account_balance, stop_loss_price, volatility_factor):
+    def adjust_position_size(account_balance, volatility, market_conditions):
         """
-        Calculates dynamic position size based on market conditions and volatility.
+        Adjust position size dynamically based on market conditions.
 
         Args:
-            account_balance (float): Current account balance.
-            stop_loss_price (float): Stop-loss price of the asset.
-            volatility_factor (float): Factor for adjusting position size based on volatility.
+            account_balance (float): The account balance available for trading.
+            volatility (float): The market volatility.
+            market_conditions (dict): Dictionary of market conditions.
 
         Returns:
-            float: Dynamic position size.
+            float: The adjusted position size.
         """
-        dynamic_size = account_balance / (stop_loss_price * volatility_factor)
-        return min(dynamic_size, account_balance)
+        if market_conditions["volatility"] > 0.1:  # Example threshold for high volatility
+            position_size = account_balance * 0.05  # Allocate 5% of account balance for trading in high volatility
+        else:
+            position_size = account_balance * 0.1  # Allocate 10% of account balance for trading in normal volatility
+        return position_size
+
 
 class HedgingStrategies:
     """
-    Implements hedging strategies for risk mitigation.
-
-    Methods:
-        implement_hedging_strategy(hedge_type): Implements specific hedging strategy.
+    Implements hedging strategies for risk management.
     """
     @staticmethod
-    def implement_hedging_strategy(hedge_type):
+    def implement_hedging(portfolio, market_conditions):
         """
-        Implements specific hedging strategy based on type.
+        Implement hedging strategies based on market conditions.
 
         Args:
-            hedge_type (str): Type of hedging strategy (e.g., options, futures).
+            portfolio (list): List of assets in the portfolio.
+            market_conditions (dict): Dictionary of market conditions.
 
         Returns:
-            str: Description of implemented hedging strategy.
+            list: The hedged portfolio based on market sentiment.
         """
-        # Placeholder for hedging strategy implementation
-        return f"Implemented {hedge_type} hedging strategy."
-
+        if market_conditions["sentiment_score"] < 0.5:  # Example threshold for negative sentiment
+            hedged_portfolio = [asset + "_hedged" for asset in portfolio]  # Placeholder: Apply hedging to each asset
+        else:
+            hedged_portfolio = portfolio  # No hedging applied
+        return hedged_portfolio
+    
 class TechnicalIndicators:
     """
-    Implements technical indicators for price analysis.
-
-    Methods:
-        calculate_bollinger_bands(prices, window_size): Calculates Bollinger Bands for price analysis.
+    Implements technical indicators for market analysis.
     """
     @staticmethod
-    def calculate_bollinger_bands(prices, window_size):
+    def calculate_bollinger_bands(prices, window_size=20, num_std_dev=2):
         """
-        Calculates Bollinger Bands for price analysis.
+        Calculate Bollinger Bands based on historical prices.
 
         Args:
-            prices (list of float): List of historical prices.
-            window_size (int): Size of the Bollinger Bands window.
+            prices (list of float): List of historical prices for the asset.
+            window_size (int, optional): The size of the window for calculating the bands. Defaults to 20.
+            num_std_dev (int, optional): The number of standard deviations for the bands. Defaults to 2.
 
         Returns:
-            tuple: Lower band, middle band, upper band.
+            tuple: The upper and lower Bollinger Bands.
         """
-        rolling_mean = MovingAverage.calculate_moving_average(prices, window_size)
-        rolling_std = np.std(prices[-window_size:])
-        upper_band = rolling_mean[-1] + (2 * rolling_std)
-        lower_band = rolling_mean[-1] - (2 * rolling_std)
-        middle_band = rolling_mean[-1]
-        return lower_band, middle_band, upper_band
+        if len(prices) < window_size:
+            return 0, 0  # Default values for bands
+        sma = MovingAverage.calculate_moving_average(prices, window_size)
+        std_dev = np.std(prices[-window_size:])
+        upper_band = sma + (num_std_dev * std_dev)
+        lower_band = sma - (num_std_dev * std_dev)
+        return upper_band, lower_band
