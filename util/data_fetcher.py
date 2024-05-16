@@ -7,9 +7,9 @@ To-Do:
 - Implement more sophisticated error handling for API requests.
 - Add support for handling different types of API responses, such as XML or CSV.
 """
-
 import requests
 import statistics
+from typing import List, Dict, Union
 from config import exchanges, PAYPAL_ENDPOINT, PAYPAL_CLIENT_ID, PAYPAL_SECRET
 from exchange_api import ExchangeAPI
 
@@ -23,7 +23,7 @@ class DataFetcher:
         exchanges (dict): Dictionary of exchange data.
         exchange_api (ExchangeAPI): Instance of ExchangeAPI for interacting with exchanges.
     """
-    def __init__(self, api_key, api_secret):
+    def __init__(self, api_key: str, api_secret: str):
         """
         Initializes the DataFetcher with API key and secret.
 
@@ -31,10 +31,10 @@ class DataFetcher:
             api_key (str): API key for authentication.
             api_secret (str): API secret for authentication.
         """
-        self.exchanges = exchanges
-        self.exchange_api = ExchangeAPI(api_key, api_secret, exchanges)
+        self.exchanges: Dict[str, Dict[str, str]] = exchanges
+        self.exchange_api: ExchangeAPI = ExchangeAPI(api_key, api_secret, exchanges)
 
-    def fetch_exchange_data(self, exchange_name):
+    def fetch_exchange_data(self, exchange_name: str) -> Union[Dict[str, str], None]:
         """
         Fetches data from a specific exchange.
 
@@ -62,7 +62,7 @@ class DataFetcher:
             print(f"Exchange '{exchange_name}' not found in config.")
             return None
 
-    def fetch_exchange_prices(self, exchange_name, asset_name):
+    def fetch_exchange_prices(self, exchange_name: str, asset_name: str) -> List[float]:
         """
         Fetches asset prices from a specific exchange.
 
@@ -82,7 +82,7 @@ class DataFetcher:
 
     # Other fetch methods with similar documentation and exception handling
 
-    def calculate_correlation(self, asset1_prices, asset2_prices):
+    def calculate_correlation(self, asset1_prices: List[float], asset2_prices: List[float]) -> Union[float, None]:
         """
         Calculates the correlation between two sets of asset prices.
 
