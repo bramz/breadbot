@@ -11,7 +11,6 @@ Usage:
 
 Example:
     python main.py
-
 """
 
 import requests
@@ -50,7 +49,17 @@ def main():
     3. Retrieve historical data from supported APIs and perform backtesting.
 
     """
-    breadbot = BreadBot(INFURA_URL, WALLETS, EXCHANGES, market_analysis.TrendingStrategy, risk_management.RSIAnalysis(), exchange_api.APIClient)
+    # Initialize BreadBot with selected strategies and APIs
+    breadbot = BreadBot(
+        INFURA_URL,
+        WALLETS,
+        EXCHANGES,
+        market_analysis.TrendingStrategy,  # Change to your preferred strategy class
+        risk_management.RSIAnalysis(),  # Change to your preferred risk analysis class
+        exchange_api.APIClient  # Change to your preferred exchange API client
+    )
+
+    # Start trading using BreadBot
     breadbot.start_trading()
 
     # Get historical data from all supported APIs
@@ -63,6 +72,7 @@ def main():
     historical_data = {k: v for k, v in historical_data.items() if v is not None}
 
     if historical_data:
+        # Perform backtesting with retrieved historical data
         breadbot.backtest_strategy(historical_data)
 
 if __name__ == "__main__":
