@@ -6,6 +6,9 @@ This module provides tools for market analysis, including sentiment analysis, tr
 
 import numpy as np
 from util.risk_management import MovingAverage
+import logging
+
+logging.basicConfig(level=logging.INFO)  # Configure logging
 
 class SentimentAnalysis:
     """
@@ -22,9 +25,13 @@ class SentimentAnalysis:
         Returns:
             float: Average sentiment score.
         """
-        sentiment_scores = [article["sentiment"] for article in news_data]
-        average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
-        return average_sentiment
+        try:
+            sentiment_scores = [article["sentiment"] for article in news_data]
+            average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
+            return average_sentiment
+        except (KeyError, TypeError) as e:
+            logging.error(f"Error in analyzing news sentiment: {str(e)}")
+            return None
 
     @staticmethod
     def calculate_market_sentiment_index(sentiment_scores):
@@ -37,7 +44,11 @@ class SentimentAnalysis:
         Returns:
             float: Market sentiment index.
         """
-        return sum(sentiment_scores) / len(sentiment_scores)
+        try:
+            return sum(sentiment_scores) / len(sentiment_scores)
+        except ZeroDivisionError:
+            logging.warning("Empty sentiment scores list.")
+            return 0
 
 class TrendingStrategy:
     """
@@ -57,8 +68,12 @@ class TrendingStrategy:
         Returns:
             bool: True if above the moving average, False otherwise.
         """
-        moving_avg = MovingAverage.calculate_simple_moving_average(moving_average_data, self.moving_average_period)
-        return current_price > moving_avg
+        try:
+            moving_avg = MovingAverage.calculate_simple_moving_average(moving_average_data, self.moving_average_period)
+            return current_price > moving_avg
+        except ZeroDivisionError:
+            logging.error("Error in calculating moving average: Zero division error.")
+            return False
 
     def is_below_moving_average(self, current_price, moving_average_data):
         """
@@ -71,9 +86,12 @@ class TrendingStrategy:
         Returns:
             bool: True if below the moving average, False otherwise.
         """
-        moving_avg = MovingAverage.calculate_simple_moving_average(moving_average_data, self.moving_average_period)
-        return current_price < moving_avg
-
+        try:
+            moving_avg = MovingAverage.calculate_simple_moving_average(moving_average_data, self.moving_average_period)
+            return current_price < moving_avg
+        except ZeroDivisionError:
+            logging.error("Error in calculating moving average: Zero division error.")
+            return False
 
 class MarketAnalysisTools:
     """
@@ -93,11 +111,15 @@ class MarketAnalysisTools:
         Returns:
             tuple: MACD line and signal line.
         """
-        ema_short = MovingAverage.calculate_moving_average(prices, short_window)
-        ema_long = MovingAverage.calculate_moving_average(prices, long_window)
-        macd_line = ema_short - ema_long
-        signal_line = MovingAverage.calculate_moving_average(macd_line, signal_window)
-        return macd_line, signal_line
+        try:
+            ema_short = MovingAverage.calculate_moving_average(prices, short_window)
+            ema_long = MovingAverage.calculate_moving_average(prices, long_window)
+            macd_line = ema_short - ema_long
+            signal_line = MovingAverage.calculate_moving_average(macd_line, signal_window)
+            return macd_line, signal_line
+        except Exception as e:
+            logging.error(f"Error in calculating MACD: {str(e)}")
+            return None, None
 
     @staticmethod
     def calculate_ema(prices, window_size):
@@ -111,7 +133,11 @@ class MarketAnalysisTools:
         Returns:
             list of float: EMA values.
         """
-        return MovingAverage.calculate_moving_average(prices, window_size)
+        try:
+            return MovingAverage.calculate_moving_average(prices, window_size)
+        except Exception as e:
+            logging.error(f"Error in calculating EMA: {str(e)}")
+            return None
 
     @staticmethod
     def calculate_atr(prices, window_size=14):
@@ -125,11 +151,15 @@ class MarketAnalysisTools:
         Returns:
             float: ATR value.
         """
-        if len(prices) <= window_size:
-            return 0  # Default ATR
-        true_range = [max(prices[i + 1], prices[i]) - min(prices[i + 1], prices[i]) for i in range(len(prices) - 1)]
-        atr = sum(true_range[-window_size:]) / window_size
-        return atr
+        try:
+            if len(prices) <= window_size:
+                return 0  # Default ATR
+            true_range = [max(prices[i + 1], prices[i]) - min(prices[i + 1], prices[i]) for i in range(len(prices) - 1)]
+            atr = sum(true_range[-window_size:]) / window_size
+            return atr
+        except Exception as e:
+            logging.error(f"Error in calculating ATR: {str(e)}")
+            return None
 
     @staticmethod
     def calculate_bollinger_bands(prices, window_size=20, num_std_dev=2):
@@ -144,10 +174,14 @@ class MarketAnalysisTools:
         Returns:
             tuple: Upper band and lower band.
         """
-        if len(prices) < window_size:
-            return 0, 0  # Default values for bands
-        sma = MovingAverage.calculate_moving_average(prices, window_size)
-        std_dev = np.std(prices[-window_size:])
-        upper_band = sma + (num_std_dev * std_dev)
-        lower_band = sma - (num_std_dev * std_dev)
-        return upper_band, lower_band
+        try:
+            if len(prices) < window_size:
+                return 0, 0  # Default values for bands
+            sma = MovingAverage.calculate_moving_average(prices, window_size)
+            std_dev = np.std(prices[-window_size:])
+            upper_band = sma + (num_std_dev * std_dev)
+            lower_band = sma - (num_std_dev * std_dev)
+            return upper_band, lower_band
+        except Exception as e:
+            logging.error(f"Error in calculating Bollinger Bands: {str(e)}")
+            return None, None
