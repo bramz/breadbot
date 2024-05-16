@@ -54,9 +54,9 @@ def main():
         INFURA_URL,
         WALLETS,
         EXCHANGES,
-        market_analysis.TrendingStrategy,  # Change to your preferred strategy class
-        risk_management.RSIAnalysis(),  # Change to your preferred risk analysis class
-        exchange_api.APIClient  # Change to your preferred exchange API client
+        market_analysis.TrendingStrategy,  # Change to preferred strategy class
+        risk_management.RSIAnalysis(),  # Change to preferred risk analysis class
+        exchange_api.APIClient  # Change to preferred exchange API client
     )
 
     # Start trading using BreadBot

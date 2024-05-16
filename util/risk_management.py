@@ -109,13 +109,13 @@ class PositionSizing:
         return min(trade_size, account_balance * self.max_drawdown)
     
 
-    class TrendAnalysis:
-        """
-        Implements trend analysis for trading strategies.
+class TrendAnalysis:
+    """
+    Implements trend analysis for trading strategies.
 
-        Methods:
-            is_above_moving_average(current_price, avg_price): Checks if the price is above the moving average.
-        """
+    Methods:
+        is_above_moving_average(current_price, avg_price): Checks if the price is above the moving average.
+    """
     @staticmethod
     def is_above_moving_average(current_price, avg_price):
         """
