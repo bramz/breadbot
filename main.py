@@ -13,12 +13,16 @@ Example:
     python main.py
 """
 
+import logging
 import requests
+from typing import Dict, Union
 from bot import BreadBot
 from config.settings import INFURA_URL, WALLETS, EXCHANGES
 from util import market_analysis, risk_management, exchange_api
 
-def get_historical_data(api_endpoint):
+logger = logging.getLogger(__name__)
+
+def get_historical_data(api_endpoint: str) -> Union[Dict, None]:
     """
     Fetch historical data from a specified API endpoint.
 
@@ -29,17 +33,14 @@ def get_historical_data(api_endpoint):
         dict or None: Historical data as a dictionary if successful, None otherwise.
     """
     try:
-        response = requests.get(api_endpoint)
-        if response.status_code == 200:
+        with requests.get(api_endpoint) as response:
+            response.raise_for_status()
             return response.json()
-        else:
-            print(f"Error fetching historical data from {api_endpoint}: {response.status_code} - {response.text}")
-            return None
-    except Exception as e:
-        print(f"Error fetching historical data from {api_endpoint}: {str(e)}")
+    except requests.RequestException as e:
+        logger.error(f"Error fetching historical data from {api_endpoint}: {e}")
         return None
 
-def main():
+def main() -> None:
     """
     Main function to initialize BreadBot and start trading.
 
@@ -47,23 +48,14 @@ def main():
     1. Initialize BreadBot with settings from config/settings.py.
     2. Start trading using BreadBot.
     3. Retrieve historical data from supported APIs and perform backtesting.
-
     """
-    # Initialize BreadBot with selected strategies and APIs
-    breadbot = BreadBot(
-        INFURA_URL,
-        WALLETS,
-        EXCHANGES,
-        market_analysis.TrendingStrategy,  # Change to preferred strategy class
-        risk_management.RSIAnalysis(),  # Change to preferred risk analysis class
-        exchange_api.APIClient  # Change to preferred exchange API client
-    )
+    logging.basicConfig(level=logging.INFO)  # Set logging level to INFO
 
-    # Start trading using BreadBot
+    breadbot = BreadBot(INFURA_URL, WALLETS, EXCHANGES, market_analysis.TrendingStrategy, risk_management.RSIAnalysis(), exchange_api.APIClient)
     breadbot.start_trading()
 
     # Get historical data from all supported APIs
-    historical_data = {}
+    historical_data: Dict[str, Dict[str, Union[str, int, float]]] = {}
     for exchange, api_details in EXCHANGES.items():
         if 'historical_data_endpoint' in api_details:
             historical_data[exchange] = get_historical_data(api_details['historical_data_endpoint'])
@@ -72,7 +64,6 @@ def main():
     historical_data = {k: v for k, v in historical_data.items() if v is not None}
 
     if historical_data:
-        # Perform backtesting with retrieved historical data
         breadbot.backtest_strategy(historical_data)
 
 if __name__ == "__main__":
