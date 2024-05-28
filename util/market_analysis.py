@@ -70,7 +70,7 @@ class TrendingStrategy:
             bool: True if above the moving average, False otherwise.
         """
         try:
-            moving_avg = MovingAverage.calculate_simple_moving_average(moving_average_data, self.moving_average_period)
+            moving_avg = MovingAverage.calculate_moving_average(moving_average_data, self.moving_average_period)
             return current_price > moving_avg
         except ZeroDivisionError:
             logging.error("Error in calculating moving average: Zero division error.")
@@ -88,7 +88,7 @@ class TrendingStrategy:
             bool: True if below the moving average, False otherwise.
         """
         try:
-            moving_avg = MovingAverage.calculate_simple_moving_average(moving_average_data, self.moving_average_period)
+            moving_avg = MovingAverage.calculate_moving_average(moving_average_data, self.moving_average_period)
             return current_price < moving_avg
         except ZeroDivisionError:
             logging.error("Error in calculating moving average: Zero division error.")
