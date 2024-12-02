@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  breadbot:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - INFURA_URL=<your_infura_url>
+      - WALLET_DATA=<your_wallet_data>
+      - EXCHANGE_DATA=<your_exchange_data>
+    entrypoint: ["python", "main.py"]

@@ -2,3 +2,9 @@ web3
 requests
 numpy
 python-binance
+pandas
+scikit-learn
+alpaca-trade-api
+mkdocs
+mkdocs-material
+python-dotenv

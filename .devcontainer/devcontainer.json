@@ -1,0 +1,20 @@
+{
+    "name": "BreadBot Dev Container",
+    "dockerFile": "Dockerfile",
+    "context": "..",
+    "appPort": ["8000:8000"],
+    "workspaceFolder": "/breadbot",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-python.python",
+          "ms-python.vscode-pylance"
+        ],
+        "settings": {
+          "python.defaultInterpreterPath": "/usr/local/bin/python"
+        }
+      }
+    },
+    "runArgs": ["--env-file", ".env"]
+  }
+  

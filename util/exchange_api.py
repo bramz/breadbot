@@ -2,170 +2,188 @@
 exchange_api.py - Module for handling exchange APIs and PayPal interactions
 
 This module provides classes for interacting with various exchange APIs and conducting trades using PayPal.
-
-Imports:
-- requests: Library for making HTTP requests.
-
-Classes:
-- ExchangeAPI: Class for interacting with exchange APIs and conducting trades.
-- APIClient: Class for making authenticated API requests to a base URL.
 """
 
 import requests
-from config.settings import PAYPAL_ENDPOINT, PAYPAL_CLIENT_ID, PAYPAL_SECRET
+import logging
+from typing import Dict, Union, Optional
 
 class ExchangeAPI:
     """
     Class for interacting with exchange APIs and conducting trades.
 
     Attributes:
-    - api_key: API key for authentication.
-    - api_secret: API secret for authentication.
-    - exchanges: Dictionary containing exchange details.
+    - base_url (str): Base URL for the exchange API.
+    - api_key (str): API key for authentication.
+    - api_secret (str): API secret for authentication.
 
     Methods:
-    - buy(token, amount, price, exchange_name=None): Method for buying tokens on exchanges.
-    - sell(token, amount, price, exchange_name=None): Method for selling tokens on exchanges.
-    - _send_trade_request(token, amount, price, endpoint): Method for sending trade requests to exchanges.
-    - _trade_with_paypal(amount): Method for conducting trades using PayPal.
-    - _get_paypal_access_token(): Method for obtaining PayPal access token.
-    - fetch_data(data_endpoint): Method for fetching data from APIs.
+    - buy(token: str, amount: float, price: float) -> Union[str, None]:
+        Method for buying tokens on exchanges.
+    - sell(token: str, amount: float, price: float) -> Union[str, None]:
+        Method for selling tokens on exchanges.
+    - send_trade_request(token: str, amount: float, price: float, endpoint: str) -> Union[str, None]:
+        Method for sending trade requests to exchanges.
+    - fetch_data(data_endpoint: str) -> Union[Dict, None]:
+        Method for fetching data from APIs.
     """
-    def __init__(self, api_key, api_secret, exchanges):
+
+    def __init__(self, base_url: str, api_key: str, api_secret: str):
+        self.base_url = base_url
         self.api_key = api_key
         self.api_secret = api_secret
-        self.exchanges = exchanges
+        self.logger = logging.getLogger(__name__)
 
-    def buy(self, token, amount, price, exchange_name=None):
+    def buy(self, token: str, amount: float, price: float) -> Union[str, None]:
         """Method for buying tokens on exchanges."""
-        for exchange_name, exchange in self.exchanges.items():
-            if exchange_name != "paypal":
-                response = self._send_trade_request(token, amount, price, exchange["buy_endpoint"])
-                if response is not None:
-                    return response
-                elif token == "usd" and amount > 0 and exchange["buy_endpoint"] == PAYPAL_ENDPOINT:
-                    paypal_order_id = self._trade_with_paypal(amount)
-                    return paypal_order_id
-        return None
+        try:
+            response = self.send_trade_request(token, amount, price, f"{self.base_url}/buy")
+            return response
+        except Exception as e:
+            self.logger.error(f"Error in buy method: {e}")
+            return None
 
-    def sell(self, token, amount, price, exchange_name=None):
+    def sell(self, token: str, amount: float, price: float) -> Union[str, None]:
         """Method for selling tokens on exchanges."""
-        for exchange_name, exchange in self.exchanges.items():
-            if exchange_name != "paypal":
-                response = self._send_trade_request(token, amount, price, exchange["sell_endpoint"])
-                if response is not None:
-                    return response
-                elif token == "usd" and amount > 0 and exchange["sell_endpoint"] == PAYPAL_ENDPOINT:
-                    paypal_order_id = self._trade_with_paypal(amount)
-                    return paypal_order_id
-        return None
+        try:
+            response = self.send_trade_request(token, amount, price, f"{self.base_url}/sell")
+            return response
+        except Exception as e:
+            self.logger.error(f"Error in sell method: {e}")
+            return None
 
-    def send_trade_request(self, token, amount, price, endpoint):
+    def send_trade_request(self, token: str, amount: float, price: float, endpoint: str) -> Union[str, None]:
         """Method for sending trade requests to exchanges."""
         try:
             headers = {"X-API-KEY": self.api_key, "X-API-SECRET": self.api_secret}
             data = {"token": token, "amount": amount, "price": price}
-            response = requests.post(endpoint, headers=headers, data=data)
-            if response.status_code == 200:
-                return response.json()["order_id"]
-            else:
-                raise Exception(f"Error in trade request: {response.status_code} - {response.text}")
-        except Exception as e:
-            raise Exception(f"Error sending trade request: {str(e)}")
+            response = requests.post(endpoint, headers=headers, json=data)
+            response.raise_for_status()
+            return response.json().get("order_id")
+        except requests.RequestException as e:
+            self.logger.error(f"Error sending trade request: {e}")
+            return None
 
-    def trade_with_paypal(self, amount):
-        """Method for conducting trades using PayPal."""
-        try:
-            paypal_access_token = self._get_paypal_access_token()
-            if paypal_access_token is not None:
-                headers = {"Authorization": f"Bearer {paypal_access_token}"}
-                data = {
-                    "client_id": PAYPAL_CLIENT_ID,
-                    "client_secret": PAYPAL_SECRET,
-                    "amount": amount,
-                    "currency": "USD",
-                    "intent": "sale"
-                }
-                response = requests.post(PAYPAL_ENDPOINT, headers=headers, json=data)
-                if response.status_code == 200:
-                    return response.json()["order_id"]
-                else:
-                    raise Exception(f"Error trading with PayPal: {response.status_code} - {response.text}")
-        except Exception as e:
-            raise Exception(f"Error trading with PayPal: {str(e)}")
-
-    def get_paypal_access_token(self):
-        """Method for obtaining PayPal access token."""
-        try:
-            auth_url = "https://api.paypal.com/v1/oauth2/token"
-            headers = {"Accept": "application/json", "Accept-Language": "en_US"}
-            data = {
-                "grant_type": "client_credentials",
-                "client_id": PAYPAL_CLIENT_ID,
-                "client_secret": PAYPAL_SECRET
-            }
-            response = requests.post(auth_url, headers=headers, data=data)
-            if response.status_code == 200:
-                return response.json()["access_token"]
-            else:
-                raise Exception(f"Error getting PayPal access token: {response.status_code} - {response.text}")
-        except Exception as e:
-            raise Exception(f"Error getting PayPal access token: {str(e)}")
-
-    def fetch_data(self, data_endpoint):
+    def fetch_data(self, data_endpoint: str) -> Union[Dict, None]:
         """Method for fetching data from APIs."""
         try:
             headers = {"X-API-KEY": self.api_key, "X-API-SECRET": self.api_secret}
             response = requests.get(data_endpoint, headers=headers)
-            if response.status_code == 200:
-                return response.json()
-            else:
-                raise Exception(f"Error fetching data: {response.status_code} - {response.text}")
-        except Exception as e:
-            raise Exception(f"Error fetching data: {str(e)}")
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error fetching data: {e}")
+            return None
 
 class APIClient:
     """
     Class for making authenticated API requests to a base URL.
 
     Attributes:
-    - base_url: Base URL for API requests.
-    - api_key: API key for authentication.
-
-    Methods:
-    - get(endpoint): Method for making GET requests.
-    - post(endpoint, data): Method for making POST requests.
-    - put(endpoint, data): Method for making PUT requests.
-    - delete(endpoint): Method for making DELETE requests.
+    - base_url (str): Base URL for API requests.
+    - api_key (str): API key for authentication.
     """
-    def __init__(self, base_url, api_key):
+
+    def __init__(self, base_url: str, api_key: str):
         self.base_url = base_url
         self.api_key = api_key
+        self.logger = logging.getLogger(__name__)
 
-    def get(self, endpoint):
+    def _get_headers(self) -> Dict[str, str]:
+        """Generate headers for API requests."""
+        return {"Authorization": f"Bearer {self.api_key}"}
+
+    def get(self, endpoint: str) -> Dict:
         """Method for making GET requests."""
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        response = requests.get(f"{self.base_url}/{endpoint}", headers=headers)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = requests.get(f"{self.base_url}/{endpoint}", headers=self._get_headers())
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error making GET request: {e}")
+            return {}
 
-    def post(self, endpoint, data):
+    def post(self, endpoint: str, data: Dict) -> Dict:
         """Method for making POST requests."""
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        response = requests.post(f"{self.base_url}/{endpoint}", headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = requests.post(f"{self.base_url}/{endpoint}", headers=self._get_headers(), json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error making POST request: {e}")
+            return {}
 
-    def put(self, endpoint, data):
+    def put(self, endpoint: str, data: Dict) -> Dict:
         """Method for making PUT requests."""
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        response = requests.put(f"{self.base_url}/{endpoint}", headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = requests.put(f"{self.base_url}/{endpoint}", headers=self._get_headers(), json=data)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error making PUT request: {e}")
+            return {}
 
-    def delete(self, endpoint):
+    def delete(self, endpoint: str) -> Dict:
         """Method for making DELETE requests."""
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        response = requests.delete(f"{self.base_url}/{endpoint}", headers=headers)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = requests.delete(f"{self.base_url}/{endpoint}", headers=self._get_headers())
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error making DELETE request: {e}")
+            return {}
+
+class AlpacaAPI:
+    """
+    Class for interacting with the Alpaca API.
+
+    Attributes:
+    - base_url (str): Base URL for Alpaca API.
+    - market_data_url (str): URL for Alpaca market data.
+    - headers (Dict[str, str]): Headers for API requests.
+    """
+
+    def __init__(self, config: Dict[str, str]):
+        self.base_url = config.get('base_url')
+        self.market_data_url = config.get('market_data_url')
+        self.headers = {
+            'APCA-API-KEY-ID': config.get('api_key'),
+            'APCA-API-SECRET-KEY': config.get('api_secret')
+        }
+        self.logger = logging.getLogger(__name__)
+
+    def get_account(self) -> Dict:
+        """Get account information from Alpaca API."""
+        try:
+            response = requests.get(f"{self.base_url}/v2/account", headers=self.headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error getting account: {e}")
+            return {}
+
+    def get_current_price(self, symbol: str) -> Dict:
+        """Get the current price of a symbol from Alpaca API."""
+        try:
+            response = requests.get(f"{self.market_data_url}/v2/stocks/{symbol}/last", headers=self.headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error getting current price: {e}")
+            return {}
+
+    def get_historical_data(self, symbol: str, start: str, end: str, timeframe: str = '1D') -> Dict:
+        """Get historical data for a symbol from Alpaca API."""
+        try:
+            params = {
+                'symbols': symbol,
+                'start': start,
+                'end': end,
+                'timeframe': timeframe
+            }
+            response = requests.get(f"{self.market_data_url}/v1beta3/crypto/us/bars", headers=self.headers, params=params)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error getting historical data: {e}")
+            return {}
